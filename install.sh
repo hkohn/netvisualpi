@@ -11,9 +11,9 @@ apt-get -y install rsyslog
 apt-get -y install dnsutils
 apt-get -y install fwbuilder
 
-rsync -Pav /perl /home/pi/
+rsync -Pav ./perl /home/pi/
 rsync -Pav ./*.sh /home/pi/
-rsync -Pav --exclude=files --exclude=rrdtool /html /var/www/
+rsync -Pav --exclude=files --exclude=rrdtool ./html /var/www/
 rsync -Pav rules.v* /etc/iptables/
 rsync -Pav netvisualpi.conf /etc/rsyslog.d/
 rsync -Pav hostname /etc/
