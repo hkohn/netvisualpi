@@ -1,11 +1,14 @@
-apt-get install bridge-utils
-apt-get install apache2
-apt-get install php7.3
-apt-get install havp
-apt-get install graphviz
+apt-get update
 
-apt-get install dnsutils
-apt-get install fwbuilder
+apt-get -y install bridge-utils
+apt-get -y install apache2
+apt-get -y install php7.3
+apt-get -y install havp
+apt-get -y install graphviz
+apt-get -y install iptables-persistent
+
+apt-get -y install dnsutils
+apt-get -y install fwbuilder
 
 rsync -Pav /perl /home/pi/
 rsync -Pav ./*.sh /home/pi/
