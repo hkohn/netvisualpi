@@ -4,7 +4,7 @@
 <title></title>
 <meta name="generator" content="Bluefish 2.2.10" >
 <meta name="author" content="Holger Kohn">
-<meta name="date" content="2020-08-24T15:36:22+0200" >
+<meta name="date" content="2020-10-20T09:21:27+0200" >
 <meta name="copyright" content="Holger Kohn">
 <meta name="keywords" content="">
 <meta name="description" content="">
@@ -35,7 +35,7 @@
 <td width="4%" bgcolor="#008000"></td>
 <td width="24%" align="center"><a href="/index.php?section=dashboard"><span style="color:white">Dashboard</span></a></td>
 <td width="24%" align="center"><a href="/index.php?section=netoverview"><span style="color:white">Netzübersicht</span></a></td>
-<td width="24%" align="center"><a href="/index.php?section=ipanalyse"><span style="color:white">IP-Analyse</span></a></td>
+<td width="24%" align="center"></td>
 <td width="24%" align="center"></td>
 </tr>
 </table>
@@ -43,7 +43,7 @@
 <tr>
 <!--td width="25%" align="center" bgcolor="#E6E6FA">Netzübersicht</td-->
 <td width="4%" bgcolor="#FFA500"></td>
-<td width="24%" align="center" height="20"><!--a href="/index.php?section=antivirus"><span style="color:white">Antivirus</span></a--></td>
+<td width="24%" align="center"><a href="/index.php?section=graphen"><span style="color:white">Graphen</span></a--></td>
 <td width="24%" align="center"><!--a href="/index.php?section=urlfilter"><span style="color:white">URL-Filter</span></a--></td>
 <td width="24%" align="center"><!--a href="/index.php?section=ipsperre"><span style="color:white">IP-Sperre</span></a--></td>
 <td width="24%" align="center"></td>
@@ -77,17 +77,45 @@ if ($_GET['section']=="netoverview") {
   print "<tr><td width='120' valign='top' bgcolor='#b0b0b0'>";
   #print "<select name='Protokol'><option>TCP</option></select>";
   print "<form action='index.php'  method='GET'>";
-  print "Ausblenden<BR><input type='checkbox' name='TCP' value='1'>TCP<BR>";
-  print "<input type='checkbox' name='UDP' value='1'>UDP<BR>";
-  print "Sichtbarkeit<BR><select id='view' name='view'><option value='1'>1</option><option value='2'>2</option><option value='3'>3</option><option value='4'>4</option><option value='5'>5</option><option value='6'>6</option><option value='7'>7</option><option value='8'>8</option><option value='9'>9</option><option value='10'>10</option></select>";
+#  print "Ausblenden<BR><input type='checkbox' name='TCP' value='1'>TCP<BR>";
+#  print "<input type='checkbox' name='UDP' value='1'>UDP<BR>";
+#  print "Sichtbarkeit<BR><select id='view' name='view'><option value='1'>1</option><option value='2'>2</option><option value='3'>3</option><option value='4'>4</option><option value='5'>5</option><option value='6'>6</option><option value='7'>7</option><option value='8'>8</option><option value='9'>9</option><option value='10'>10</option></select>";
   print "<input type='hidden' name='section' value='netoverview'>";
   print "<BR><BR><button name='submit' type='submit' value='10_Minuten'>10_Minuten_Anzeige</button>";
   print "<button name='submit' type='submit' value='Tagesanzeige'>Tagesanzeige</button>";
+  $files = shell_exec('ls -t /var/www/html/files/logday* | head -30');
+  foreach (explode("\n",$files) as $f) {
+  	 $f = preg_replace('/^.*logday/','logday',$f);
+    print "<button name='submit' type='submit' value='$f'>$f</button>";
+  }
   print "</form>";
   print "</td>";
   print "<td height='800'><object data='tmp.svg' type='image/svg+xml' height='100%'></td>";
   #print "<td height='600'><img src='tmp.svg' width='100%'></td>";
   print "</tr></table>";
+}
+if (preg_match('/ipanalyze-(.*)$/', $_GET['section'], $outget)) {
+  print "$outget[1]";
+  $ip=$outget[1];
+  $output = shell_exec('A=`ls -rt /var/www/html/files/logday*.log | tail -1`; perl /home/pi/perl/log2dot_ip.pl $A '.$ip.' > /var/www/html/files/tmp.dot');
+  $output = shell_exec('dot -Tsvg -o /var/www/html/tmp.svg /var/www/html/files/tmp.dot');
+  print "<table width='100%'>";
+  print "<tr><td width='120' valign='top' bgcolor='#b0b0b0'>";
+  $files = shell_exec('ls -t /var/www/html/files/logday* | head -30');
+  foreach (explode("\n",$files) as $f) {
+  	 $f = preg_replace('/^.*logday/','logday',$f);
+    print "<button name='submit' type='submit' value='$f'>$f</button>";
+  }
+  print "</td>";
+  print "<td height='800'><object data='tmp.svg' type='image/svg+xml' width='100%'></td>";
+  print "</tr></table>";
+}
+if ($_GET['section']=="graphen") {
+  	print "<H1>12 Stunden</H1><img src='/rrdtool/br0-2hour.png'><BR><img src='/rrdtool/eth0-2hour.png'><BR><img src='/rrdtool/eth1-2hour.png'><BR>";
+  	print "<H1>Tag</H1><img src='/rrdtool/br0-day.png'><BR><img src='/rrdtool/eth0-day.png'><BR><img src='/rrdtool/eth1-day.png'><BR>";
+  	print "<H1>Woche</H1><img src='/rrdtool/br0-week.png'><BR><img src='/rrdtool/eth0-week.png'><BR><img src='/rrdtool/eth1-week.png'><BR>";
+  	print "<H1>Monat</H1><img src='/rrdtool/br0-month.png'><BR><img src='/rrdtool/eth0-month.png'><BR><img src='/rrdtool/eth1-month.png'><BR>";
+  	print "<H1>Jahr</H1><img src='/rrdtool/br0-year.png'><BR><img src='/rrdtool/eth0-year.png'><BR><img src='/rrdtool/eth1-year.png'><BR>";
 }
 if ($_GET['section']=="logfiles") {
   $output = shell_exec('tail -50 /var/log/netvipi-eth0.log');
@@ -99,7 +127,7 @@ if ($_GET['section']=="dashboard") {
   print "uptime: $output<BR>";
   $output = shell_exec('netstat -i');
   print "<textarea rows='8' cols='80'>netstat -i: $output</textarea><BR>";
-  print "<img src='/rrdtool/br0-day.png'><BR><img src='/rrdtool/eth0-day.png'><BR><img src='/rrdtool/eth1-day.png'><BR>";
+  print "<img src='/rrdtool/br0-2hour.png'><BR><img src='/rrdtool/eth0-2hour.png'><BR><img src='/rrdtool/eth1-2hour.png'><BR>";
   #print "<table width='100%'><tr><td align='center'><img src='vnstat_h.jpg'><BR><img src='vnstat_d.jpg'></td></tr></table>";
 }
 if ($_GET['section']=="firewall") {
@@ -123,14 +151,9 @@ if (isset($_GET['section'])) {
   $output = shell_exec('ifconfig eth0 | grep "ether" | cut -d " " -f 10 | sed -e "s/://g"');
   print "<td><a href='mailto:support@netvisualpi.de?subject=Support%20für%20netvipi$output'><span style='color:white'>Support</span></a></td><td width='250'><span style='color:white'>Serial#: netvipi$output</span></td>";
 ?>
-<td width="100" align="right"><span style="color:white">Version 0.7</span></td></tr></table>
+<td width="100" align="right"><span style="color:white">Version 0.8.1</span></td></tr></table>
 </td>
 </tr>
 </table>
 </body>
-
-
 </html>
-
-
-

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 #
 # copyright Martin Pot 2003-2016
 # http://martybugs.net/linux/rrdtool/traffic.cgi
@@ -6,16 +6,21 @@
 # rrd_traffic.pl
 
 use RRDs;
+use strict;
 
 # define location of rrdtool databases
 my $rrd = '/var/lib/rrd';
 # define location of images
 my $img = '/var/www/html/rrdtool';
+my $ERROR = "";
+my $in2;
+my $out2;
 
 # process data for each interface (add/delete as required)
-&ProcessInterface("br0", "bridged network");
+&ProcessInterface("br0", "bridge");
 &ProcessInterface("eth0", "internet gateway");
-&ProcessInterface("eth1", "internal link");
+&ProcessInterface("eth1", "internal");
+#&ProcessInterface("eth2", "MartinMast wireless link");
 #&ProcessInterface("eth3", "home wireless");
 
 sub ProcessInterface
@@ -24,17 +29,6 @@ sub ProcessInterface
 # inputs: $_[0]: interface name (ie, eth0/eth1/eth2/ppp0)
 #	  $_[1]: interface description 
 
-	# get network interface info
-	#my $in = `ifconfig $_[0] |grep bytes|cut -d":" -f2|cut -d" " -f1`;
-	my $in = `ifconfig  $_[0]|grep "RX.*bytes" | cut -d " " -f14`;
-	#my $out = `ifconfig $_[0] |grep bytes|cut -d":" -f3|cut -d" " -f1`;
-	my $out = `ifconfig $_[0] |grep "TX.*bytes" | cut -d " " -f14`;
-
-	# remove eol chars
-	chomp($in);
-	chomp($out);
-
-	print "$_[0] traffic in, out: $in, $out\n";
 
 	# if rrdtool database doesn't exist, create it
 	#  if the rrdtool database was created with an older version of this script, without the MAX RRAs, you can add them using:
@@ -60,14 +54,50 @@ sub ProcessInterface
 		if ($ERROR = RRDs::error) { print "$0: unable to create $rrd/$_[0].rrd: $ERROR\n"; }
 	}
 
+	# get network interface info
+#	my $in = `ifconfig $_[0] |grep bytes|cut -d":" -f2|cut -d" " -f1`;
+#	my $in = `ifconfig  $_[0]|grep "RX.*bytes" | cut -d " " -f14`;
+	my $in = `/sbin/ifconfig  $_[0] | /bin/grep "RX.*bytes"`;
+#	my $in = `netstat -i | grep $_[0] | /usr/bin/awk '{print $3}'`;
+	if ($in =~ m/bytes (.*) \(/) {
+	  $in = $1;
+	  print "in: $in";
+	  my $in = sprintf("%d", $in / 1048576 );
+	  print "in: $in\n";
+	  $in2=$in;
+	} else {
+	  die "Failed to get stats\n";
+	}
+#	my $out = `ifconfig $_[0] |grep bytes|cut -d":" -f3|cut -d" " -f1`;
+#	my $out = `ifconfig  $_[0]|grep "TX.*bytes" | cut -d " " -f14`;
+	my $out = `/sbin/ifconfig  $_[0] | /bin/grep "TX.*bytes"`;
+#	my $out = `netstat -i | grep $_[0] | /usr/bin/awk '{print $7}' `;
+	chomp($out);
+	if ($out =~ m/bytes (.*) \(/) {
+	  $out = $1;
+	  print "out: $out";
+	  my $out = sprintf("%d", $out / 1048576 );
+	  print "out: $out\n";
+	  $out2=$out;
+	} else {
+	  die "Failed to get stats\n";
+	}
+
+	# remove eol chars
+#	chomp($in);
+#	chomp($out);
+
+	print "$_[0] traffic in, out: $in2, $out2\n";
 	# insert values into rrd
 	RRDs::update "$rrd/$_[0].rrd",
 		"-t", "in:out",
-		"N:$in:$out";
+		"N:$in2:$out2";
 	# check for database insertion error
 	if ($ERROR = RRDs::error) { print "$0: unable to insert data into $rrd/$_[0].rrd: $ERROR\n"; }
 
 	# create traffic graphs
+	&CreateGraph($_[0], "hour", $_[1]);
+	&CreateGraph($_[0], "2hour", $_[1]);
 	&CreateGraph($_[0], "day", $_[1]);
 	&CreateGraph($_[0], "week", $_[1]);
 	&CreateGraph($_[0], "month", $_[1]); 
@@ -88,7 +118,7 @@ sub CreateGraph
 		"-h", "80", "-w", "600",
 		"-l 0",
 		"-a", "PNG",
-		"-v bits/sec",
+		"-v Mbits/sec",
 		"--slope-mode",
 		"--border", "0",
 		"--color", "BACK#ffffff",
@@ -98,22 +128,24 @@ sub CreateGraph
 		"DEF:maxin=$rrd/$_[0].rrd:in:MAX",
 		"DEF:out=$rrd/$_[0].rrd:out:AVERAGE",
 		"DEF:maxout=$rrd/$_[0].rrd:out:MAX",
+		"CDEF:prev_out=PREV(out)",
+		"CDEF:prev_in=PREV(in)",
 		"CDEF:out_neg=out,-1,*",
 		"CDEF:out_bits=out_neg,8,*",
 		"CDEF:in_bits=in,8,*",
 		"CDEF:maxout_neg=maxout,-1,*",
                 "CDEF:maxin_bits=maxin,8,*",
-                "CDEF:maxout_bits=maxout_neg,8,*,300,/",
+                "CDEF:maxout_bits=maxout_neg,8,*",
 		"AREA:in_bits#32CD32:Incoming",
 		"LINE1:maxin_bits#336600",
 		"GPRINT:maxin_bits:MAX:  Max\\: %6.1lf %s",
 		"GPRINT:in_bits:AVERAGE: Avg\\: %6.1lf %S",
-		"GPRINT:in_bits:LAST: Current\\: %6.1lf %Sbits/sec\\n",
+		"GPRINT:in_bits:LAST: Current\\: %6.1lf %SMbits/sec\\n",
 		"AREA:out_bits#4169E1:Outgoing",
 		"LINE1:maxout_bits#0033CC",
 		"GPRINT:maxout:MAX:  Max\\: %6.1lf %S",
 		"GPRINT:out_bits:AVERAGE: Avg\\: %6.1lf %S",
-		"GPRINT:out_bits:LAST: Current\\: %6.1lf %Sbits/sec\\n",
+		"GPRINT:out_bits:LAST: Current\\: %6.1lf %SMbits/sec\\n",
 		"HRULE:0#000000";
 	# check for graph creation error
 	if ($ERROR = RRDs::error) { print "$0: unable to generate $_[0] graph: $ERROR\n"; }

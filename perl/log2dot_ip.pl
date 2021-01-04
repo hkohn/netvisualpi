@@ -21,7 +21,7 @@ my $countmax=1;
 my $countfact=0;
 my $penw=0;
 my $is_rfc1918 = subnet_matcher qw' 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ';
-my $broadcast = subnet_matcher qw' 10.0.0.255/32 239.255.255.250/32 224.0.0.252/32';
+my $broadcast = subnet_matcher qw' 10.0.0.255/32 224.0.0./4';
      
 #my $filename = '/var/log/netvipi-eth0.log';
 my $filename = $ARGV[0];
@@ -51,35 +51,35 @@ while (my $row = <$fh>) {
 #      $countfact = 10/$countmax;
 #      print "$countmax:$countfact\n";  
 #    }
-    if ( $is_rfc1918->($SRCip) ) {
+#    if ( $is_rfc1918->($SRCip) ) {
       if (exists $ip2name{$SRCip}) {      
       } else {
         $ip2name{$SRCip} = "1";
       }
-    } elsif ( $broadcast->($SRCip) ) {
-      $SRCip="Broadcast";
-    } else {
+#    } elsif ( $broadcast->($SRCip) ) {
+#      $SRCip="Broadcast";
+#    } else {
 #      $SRCip="Internet";
 #      if (exists $ip2name{$SRCip}) {
 #      } else {
 #        $ip2name{$SRCip} = "1";
 #      }
-    }
-    if ( $is_rfc1918->($DSTip) ) {
+#    }
+#    if ( $is_rfc1918->($DSTip) ) {
       if (exists $ip2name{$DSTip}) {      
       } else {
         $ip2name{$DSTip} = "1";
       }
-    } elsif ( $broadcast->($DSTip) ) {
-      $DSTip="Broadcast";
-    } else {
+#    } elsif ( $broadcast->($DSTip) ) {
+#      $DSTip="Broadcast";
+#    } else {
 #      $DSTip="Internet";
 #      $ip2name{$DSTip} = "1";
 #      if (exists $ip2name{$DSTip}) {
 #      } else {
 #        $ip2name{$DSTip} = "1";
 #      }
-    }
+#    }
     if ($SRCprt>=1025) {
       $SRCprt=0;    
     }
@@ -118,14 +118,14 @@ for my $ip2 (@ips) {
   chomp $name;
   if ($name =~m/name = (\S+)/) {
 #    print "  \"$ip2\" [label=\"$ip2\\n$1\"];\n";
-    print "  \"$ip2\" [URL=\"index.php?section=ipanalyse-$ip2\", label=\"$ip2\\n$1\"];\n";
+    print "  \"$ip2\" [URL=\"https://netvisualpi/index.php?section=ipanalyze-$ip2\", target=\"_parent\", label=\"$ip2\\n$1\"];\n";
   }
 }
 
 my @keys = keys %connections;
 for my $key2 (@keys) {
   my $counts = $connections{$key2}*$countfact;
-  if ($counts >= 0.5) {
+  if ($counts >= 0) {
     ($SRCip, $DSTip, $SRCprt, $DSTprt, $PROTO) = split /;/,$key2;
     if ($PROTO eq "TCP") {
       if ($DSTprt == "80") {

@@ -21,7 +21,7 @@ my $countmax=0;
 my $countfact=0;
 my $penw=0;
 my $is_rfc1918 = subnet_matcher qw' 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ';
-my $broadcast = subnet_matcher qw' 255.255.255.255/32 239.255.255.250/32 ';
+my $broadcast = subnet_matcher qw' 255.255.255.255/32 224.0.0.0/4 ';
      
 #my $filename = '/var/log/netvipi-eth0.log';
 my $filename = $ARGV[0];
@@ -113,7 +113,7 @@ $countfact = 10/$countmax;
 
 
 #print "digraph g {\n  graph[ splines=polyline; rankdir=\"LR\" ];\n";     
-print "digraph html {\n  rankdir=\"LR\";\n  labelloc=\"t\";\n label=\"$filename\";\n";     
+print "digraph html {\n  rankdir=\"LR\";\n  labelloc=\"t\";\n label=\"$filename\";\n \"Internet\" [style=filled, fillcolor=lightblue];\n \"Broadcast\" [style=filled, fillcolor=purple];\n";     
 
 my @ips = keys %ip2name;
 for my $ip2 (@ips) {
@@ -121,14 +121,14 @@ for my $ip2 (@ips) {
   chomp $name;
   if ($name =~m/name = (\S+)/) {
 #    print "  \"$ip2\" [label=\"$ip2\\n$1\"];\n";
-    print "  \"$ip2\" [URL=\"index.php?section=ipanalyse-$ip2\", label=\"$ip2\\n$1\"];\n";
+    print "  \"$ip2\" [URL=\"index.php?section=ipanalyze-$ip2\",target=\"_parent\", label=\"$ip2\\n$1\", shape=box, style=filled, fillcolor=lightgrey];\n";
   }
 }
 
 my @keys = keys %connections;
 for my $key2 (@keys) {
   my $counts = $connections{$key2}*$countfact;
-  if ($counts >= 3.0) {
+  if ($counts >= 0.5) {
     ($SRCip, $DSTip, $SRCprt, $DSTprt, $PROTO) = split /;/,$key2;
     if ($PROTO eq "TCP") {
       if ($DSTprt == "80") {

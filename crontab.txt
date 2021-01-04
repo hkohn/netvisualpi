@@ -22,7 +22,7 @@
 # 
 # m h  dom mon dow   command
 
-*/5 * * * * /usr/bin/perl /home/pi/perl/rrd_traffic.pl > /dev/null
+*/5 * * * * /home/pi/perl/rrd_traffic.pl > /dev/null
 
 10 0 * * * /home/pi/log_day.sh
 */10 * * * * /home/pi/tmp_10m.sh
