@@ -6,6 +6,7 @@ apt-get -y install php7.3
 apt-get -y install havp
 apt-get -y install graphviz
 apt-get -y install iptables-persistent
+apt-get -y install rsyslog
 
 apt-get -y install dnsutils
 apt-get -y install fwbuilder
