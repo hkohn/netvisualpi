@@ -20,4 +20,10 @@ rsync -Pav --exclude=files --exclude=rrdtool ./html /var/www/
 rsync -Pav rules.v* /etc/iptables/
 rsync -Pav netvisualpi.conf /etc/rsyslog.d/
 rsync -Pav hostname /etc/
+
+mkdir /var/lib/rrd
+chmod 775 /var/lib/rrd
+mkdir /var/www/html/rrdtool
+chmod 775 /var/www/html/rrdtool
+
 # crontab -l > crontab.txt
