@@ -8,6 +8,7 @@ apt-get -y install graphviz
 apt-get -y install iptables-persistent
 apt-get -y install rsyslog
 apt-get -y install rrdtool
+apt-get -y install librrds-perl
 
 apt-get -y install dnsutils
 apt-get -y install fwbuilder
