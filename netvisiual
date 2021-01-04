@@ -1,0 +1,13 @@
+/var/log/netvipi-br0.log
+/var/log/netvipi-eth0.log
+/var/log/netvipi-eth1.log
+{
+	rotate 7
+	daily
+	missingok
+#	notifempty
+#	delaycompress
+#	compress
+	endscript
+}
+
