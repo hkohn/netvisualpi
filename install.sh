@@ -16,4 +16,5 @@ rsync -Pav ./*.sh /home/pi/
 rsync -Pav --exclude=files --exclude=rrdtool /html /var/www/
 rsync -Pav rules.v* /etc/iptables/
 rsync -Pav netvisualpi.conf /etc/rsyslog.d/
+rsync -Pav hostname /etc/
 # crontab -l > crontab.txt
