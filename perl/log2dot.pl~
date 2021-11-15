@@ -17,22 +17,20 @@ my $Pin="";
 my $Pout="";
 my $MAC="";
 my $count=0;
-my $countmax=1;
+my $countmax=0;
 my $countfact=0;
 my $penw=0;
 my $is_rfc1918 = subnet_matcher qw' 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ';
-my $broadcast = subnet_matcher qw' 10.0.0.255/32 224.0.0./4';
+my $broadcast = subnet_matcher qw' 255.255.255.255/32 224.0.0.0/4 ';
      
 #my $filename = '/var/log/netvipi-eth0.log';
 my $filename = $ARGV[0];
-my $IPsearch = $ARGV[1];
 open(my $fh, '<:encoding(UTF-8)', $filename)
   or die "Could not open file '$filename' $!";
      
 while (my $row = <$fh>) {
   chomp $row;
 #  print "$row\n";
-  if ($row =~ m/$ARGV[1];/) {
   if ($row =~m/\s+(\S+) (\S+);(\S+);(\S+);(\S+);(\S+);(\S+);(\S+);(\S+)/) {
     $count=$1;
     $SRCip=$2;
@@ -44,46 +42,52 @@ while (my $row = <$fh>) {
     $Pout=$8;
     $MAC=$9;
   }
-#  print "---> $row\n";
 #  if ($PROTO eq "TCP") {
 #    if ($count >= $countmax) {
 #      $countmax = $count;
 #      $countfact = 10/$countmax;
 #      print "$countmax:$countfact\n";  
 #    }
-#    if ( $is_rfc1918->($SRCip) ) {
+    if ( $is_rfc1918->($SRCip) ) {
       if (exists $ip2name{$SRCip}) {      
       } else {
         $ip2name{$SRCip} = "1";
       }
-#    } elsif ( $broadcast->($SRCip) ) {
-#      $SRCip="Broadcast";
-#    } else {
-#      $SRCip="Internet";
-#      if (exists $ip2name{$SRCip}) {
-#      } else {
-#        $ip2name{$SRCip} = "1";
-#      }
-#    }
-#    if ( $is_rfc1918->($DSTip) ) {
+    } elsif ( $broadcast->($SRCip) ) {
+      $SRCip="Broadcast";
+    } elsif ( $SRCip eq "224.0.0.251") {
+      $SRCip="MDNS";
+    } elsif ( $SRCip eq "0.0.0.0") {
+      $SRCip="0.0.0.0";
+    } else {
+      $SRCip="Internet";
+    }
+    if ( $is_rfc1918->($DSTip) ) {
       if (exists $ip2name{$DSTip}) {      
       } else {
         $ip2name{$DSTip} = "1";
       }
-#    } elsif ( $broadcast->($DSTip) ) {
-#      $DSTip="Broadcast";
-#    } else {
-#      $DSTip="Internet";
-#      $ip2name{$DSTip} = "1";
-#      if (exists $ip2name{$DSTip}) {
-#      } else {
-#        $ip2name{$DSTip} = "1";
-#      }
-#    }
-    if ($SRCprt>=1025) {
+    } elsif ( $broadcast->($DSTip) ) {
+      $DSTip="Broadcast";
+    } elsif ( $DSTip eq "224.0.0.251") {
+      $DSTip="MDNS";
+    } elsif ( $DSTip eq "0.0.0.0") {
+      $DSTip="0.0.0.0";
+    } else {
+      $DSTip="Internet";
+    }
+    if ($SRCprt==5353) {
+      $SRCprt=5353;
+    } elsif ($SRCprt==6771) {
+      $SRCprt=6771;
+    } elsif ($SRCprt>=1025) {
       $SRCprt=0;    
     }
-    if ($DSTprt>=1025) {
+    if ($DSTprt==5353) {
+      $DSTprt=5353;
+    } elsif ($DSTprt==6771) {
+      $DSTprt=6771;
+    } elsif ($DSTprt>=1025) {
       $DSTprt=0;    
     }
 #    $penw = $count * $countfact;
@@ -102,15 +106,14 @@ while (my $row = <$fh>) {
 #      print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\", penwidth=$penw];\n";
 #    }
 #  }
-  }
 }
 #print "$countmax\n";
 $countfact = 10/$countmax;
 #print "$countmax $countfact\n";
 
 
-#print "digraph g {\n  rankdir=\"LR\";\n";     
-print "digraph html {\n  rankdir=\"LR\";\n";     
+#print "digraph g {\n  graph[ splines=polyline; rankdir=\"LR\" ];\n";     
+print "digraph html {\n  rankdir=\"LR\";\n  labelloc=\"t\";\n label=\"$filename\";\n \"Internet\" [style=filled, fillcolor=lightblue];\n \"Broadcast\" [style=filled, fillcolor=purple];\n";     
 
 my @ips = keys %ip2name;
 for my $ip2 (@ips) {
@@ -118,25 +121,27 @@ for my $ip2 (@ips) {
   chomp $name;
   if ($name =~m/name = (\S+)/) {
 #    print "  \"$ip2\" [label=\"$ip2\\n$1\"];\n";
-    print "  \"$ip2\" [URL=\"https://netvisualpi/index.php?section=ipanalyze-$ip2\", target=\"_parent\", label=\"$ip2\\n$1\"];\n";
+    print "  \"$ip2\" [URL=\"index.php?section=ipanalyze-$ip2\",target=\"_parent\", label=\"$ip2\\n$1\", shape=box, style=filled, fillcolor=lightgrey];\n";
   }
 }
 
 my @keys = keys %connections;
 for my $key2 (@keys) {
   my $counts = $connections{$key2}*$countfact;
-  if ($counts >= 0) {
+  if ($counts >= 0.1) {
     ($SRCip, $DSTip, $SRCprt, $DSTprt, $PROTO) = split /;/,$key2;
     if ($PROTO eq "TCP") {
       if ($DSTprt == "80") {
-        print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\n$connections{$key2}\", penwidth=$counts, color=\"red\"];\n";
-      } elsif ($DSTprt == "443") {
-        print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\n$connections{$key2}\", penwidth=$counts, color=\"green\"];\n";
-      } else {
         print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\n$connections{$key2}\", penwidth=$counts, color=\"blue\"];\n";
+      } else {
+        print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\n$connections{$key2}\", penwidth=$counts, color=\"green\"];\n";
       }
     } else {
-      print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\n$connections{$key2}\", penwidth=$counts, color=\"lightgrey\"];\n";
+      if ($DSTprt == "6771") {
+        print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\n$connections{$key2}\", penwidth=$counts, color=\"red\"];\n";
+      } else {
+        print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\n$connections{$key2}\", penwidth=$counts, color=\"lightgrey\"];\n";
+      }
     }
   }
 }

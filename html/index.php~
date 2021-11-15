@@ -4,7 +4,7 @@
 <title></title>
 <meta name="generator" content="Bluefish 2.2.10" >
 <meta name="author" content="Holger Kohn">
-<meta name="date" content="2021-07-24T13:22:01+0200" >
+<meta name="date" content="2021-07-24T13:21:19+0200" >
 <meta name="copyright" content="Holger Kohn">
 <meta name="keywords" content="">
 <meta name="description" content="">
@@ -168,7 +168,7 @@ if ($_GET['section']=="firewall") {
   print "<table width='100%'><tr><td align='center'>$output2</td></tr></table>";
 }
 if ($_GET['section']=="Setup") {
-  print "DDoS aktivieren <input type='checkbox' id='ddos-active' name='ddos-active'><BR>";
+  print "<input type='checkbox' id='ddos-active' name='ddos-active'><BR>";
   print "Telegram-BOT-Token <textarea id='telegram-token' name='text' cols='35' rows='1'></textarea>";
   print "<BR><BR><button name='submit' type='submit' value='setup_speichern'>Setup speichern</button>";
 }

@@ -32,7 +32,7 @@ open(my $fh, '<:encoding(UTF-8)', $filename)
 while (my $row = <$fh>) {
   chomp $row;
 #  print "$row\n";
-  if ($row =~ m/$ARGV[1];/) {
+  if ($row =~ m/$ARGV[1]/) {
   if ($row =~m/\s+(\S+) (\S+);(\S+);(\S+);(\S+);(\S+);(\S+);(\S+);(\S+)/) {
     $count=$1;
     $SRCip=$2;

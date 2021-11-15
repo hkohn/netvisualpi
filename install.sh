@@ -9,6 +9,7 @@ apt-get -y install iptables-persistent
 apt-get -y install rsyslog
 apt-get -y install rrdtool
 apt-get -y install librrds-perl
+apt-get -y install squid
 
 apt-get -y install dnsutils
 apt-get -y install fwbuilder
@@ -21,6 +22,8 @@ rsync -Pav rules.v* /etc/iptables/
 rsync -Pav netvisualpi.conf /etc/rsyslog.d/
 rsync -Pav hostname /etc/
 rsync -Pav netvisiual /etc/logrotate.d/
+rsync -Pav squid.conf /etc/squid/ 
+rsync -Pav interfaces /etc/network/
 
 mkdir /var/lib/rrd
 chmod 775 /var/lib/rrd
@@ -28,5 +31,7 @@ mkdir /var/www/html/rrdtool
 chmod 775 /var/www/html/rrdtool
 mkdir /var/www/html/files/
 chmod 775 /var/www/html/files
+
+cpan Net/Subnet.pm
 
 # crontab -l > crontab.txt

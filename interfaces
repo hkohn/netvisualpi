@@ -1,0 +1,22 @@
+# interfaces(5) file used by ifup(8) and ifdown(8)
+
+# Please note that this file is written to be used with dhcpcd
+# For static IP, consult /etc/dhcpcd.conf and 'man dhcpcd.conf'
+
+# Include files from /etc/network/interfaces.d:
+source-directory /etc/network/interfaces.d
+
+# Bridge between eth0 and eth1
+auto br0
+iface br0 inet dhcp
+# For static configuration delete or comment out the above line and uncomment the following:
+# iface br0 inet static
+#  address 192.168.1.10
+#  netmask 255.255.255.0
+#  gateway 192.168.1.1
+#  dns-nameservers 192.168.1.5
+#  dns-search example.com
+   bridge_ports eth0 eth1
+   bridge_stp off
+   bridge_fd 0
+   bridge_maxwait 0

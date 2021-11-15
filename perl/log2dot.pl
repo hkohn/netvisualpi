@@ -128,13 +128,15 @@ for my $ip2 (@ips) {
 my @keys = keys %connections;
 for my $key2 (@keys) {
   my $counts = $connections{$key2}*$countfact;
-  if ($counts >= 0.5) {
+  if ($counts >= 0.1) {
     ($SRCip, $DSTip, $SRCprt, $DSTprt, $PROTO) = split /;/,$key2;
     if ($PROTO eq "TCP") {
       if ($DSTprt == "80") {
-        print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\n$connections{$key2}\", penwidth=$counts, color=\"blue\"];\n";
-      } else {
+        print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\n$connections{$key2}\", penwidth=$counts, color=\"red\"];\n";
+      } elsif ($DSTprt == "443") {
         print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\n$connections{$key2}\", penwidth=$counts, color=\"green\"];\n";
+      } else {
+        print "  \"$SRCip\" -> \"$DSTip\" [label=\"$SRCprt->$DSTprt\n$connections{$key2}\", penwidth=$counts, color=\"blue\"];\n";
       }
     } else {
       if ($DSTprt == "6771") {

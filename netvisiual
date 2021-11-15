@@ -1,10 +1,14 @@
 /var/log/netvipi-br0.log
 /var/log/netvipi-eth0.log
 /var/log/netvipi-eth1.log
+/var/log/netvipi-ddos.log
 {
-	rotate 7
+	rotate 30
 	daily
+	dateext
+	dateformat _%d_%m_%Y
 	missingok
+	olddir /var/www/html/files/
 #	notifempty
 #	delaycompress
 #	compress

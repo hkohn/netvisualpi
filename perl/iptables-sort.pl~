@@ -1,0 +1,34 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
+my $SRCip="";
+my $DSTip="";
+my $SRCprt="";
+my $DSTprt="";
+my $PROTO="";
+my $Pin="";
+my $Pout="";
+my $MAC="";
+     
+#my $filename = '/var/log/netvipi-eth0.log';
+my $filename = $ARGV[0];
+open(my $fh, '<:encoding(UTF-8)', $filename)
+  or die "Could not open file '$filename' $!";
+     
+while (my $row = <$fh>) {
+  chomp $row;
+#  print "$row\n";
+  if ($row =~m/PHYSIN=(\S+) PHYSOUT=(\S+) MAC=(\S+) SRC=(\S+) DST=(\S+).*PROTO=(\S+) SPT=(\S+) DPT=(\S+)/) {
+    $SRCip=$4;
+    $DSTip=$5;
+    $SRCprt=$7;
+    $DSTprt=$8;
+    $PROTO=$6;
+    $Pin=$1;
+    $Pout=$2;
+    $MAC=$3;
+  }
+  print "$SRCip;$SRCprt;$DSTip;$DSTprt;$PROTO;$Pin;$Pout\n";
+}

@@ -24,8 +24,8 @@
 
 */5 * * * * /home/pi/perl/rrd_traffic.pl > /dev/null
 
-10 0 * * * /home/pi/log_day.sh
-*/10 * * * * /home/pi/tmp_10m.sh
+#10 0 * * * /home/pi/log_day.sh
+#*/10 * * * * /home/pi/tmp_10m.sh
 
 #55 * * * * vnstati -i eth0 -h -o /var/www/html/vnstat_h.jpg --transparent
 #55 23 * * * vnstati -i eth0 -d -o /var/www/html/vnstat_d.jpg --transparent
