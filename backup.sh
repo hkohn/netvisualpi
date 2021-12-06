@@ -6,5 +6,6 @@ rsync -Pav /etc/hostname ./
 rsync -Pav /etc/logrotate.d/netvisiual ./
 rsync -Pav /etc/squid/squid.conf ./
 rsync -Pav /etc/network/interfaces ./
+rsync -Pav /etc/apache2/sites-enabled/default-ssl.conf ./
 cp /etc/iptables/rules.v* ./
 crontab -l > crontab.txt

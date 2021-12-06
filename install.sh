@@ -24,6 +24,8 @@ rsync -Pav hostname /etc/
 rsync -Pav netvisiual /etc/logrotate.d/
 rsync -Pav squid.conf /etc/squid/ 
 rsync -Pav interfaces /etc/network/
+rsync -Pav default-ssl.conf /etc/apache2/sites-enabled/
+rm -rf /etc/apache2/sites-enabled/000-default.conf
 
 mkdir /var/lib/rrd
 chmod 775 /var/lib/rrd
@@ -31,6 +33,8 @@ mkdir /var/www/html/rrdtool
 chmod 775 /var/www/html/rrdtool
 mkdir /var/www/html/files/
 chmod 775 /var/www/html/files
+chmod 777 /var/www/html/rrdtool
+chmod 777 /var/www/html/tmp.svg
 
 cpan Net/Subnet.pm
 
