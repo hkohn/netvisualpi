@@ -36,6 +36,9 @@ chmod 775 /var/www/html/files
 chmod 777 /var/www/html/rrdtool
 chmod 777 /var/www/html/tmp.svg
 
+a2enmod ssl
+systemctl restart apache2
+
 cpan Net/Subnet.pm
 
 # crontab -l > crontab.txt
