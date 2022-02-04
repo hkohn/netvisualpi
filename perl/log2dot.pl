@@ -122,6 +122,8 @@ for my $ip2 (@ips) {
   if ($name =~m/name = (\S+)/) {
 #    print "  \"$ip2\" [label=\"$ip2\\n$1\"];\n";
     print "  \"$ip2\" [URL=\"index.php?section=ipanalyze-$ip2\",target=\"_parent\", label=\"$ip2\\n$1\", shape=box, style=filled, fillcolor=lightgrey];\n";
+  } else {
+    print "  \"$ip2\" [URL=\"index.php?section=ipanalyze-$ip2\",target=\"_parent\", label=\"$ip2\\nNaN\", shape=box, style=filled, fillcolor=lightgrey];\n";
   }
 }
 
